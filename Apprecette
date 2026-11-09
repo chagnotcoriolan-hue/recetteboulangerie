@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-stone-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mes recettes - Boulangerie & Pâtisserie</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeed',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Nutrition Breakdown -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .print-shadow-none { box-shadow: none !important; border: 1px solid #ccc !important; }
+        }
+    </style>
+	<link rel="manifest" href="/manifest.json">
+</head>
+<body class="h-full flex flex-col text-stone-800">
+
+ <!-- Top Navigation Header -->
+<header class="bg-amber-700 text-white shadow-lg no-print" style="padding-top: max(env(safe-area-inset-top), 1.5rem);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center text-white text-xl shadow-lg shadow-amber-600/30 flex-shrink-0">
+                    <i class="fa-solid fa-wheat-awn"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Mes recettes <span class="text-amber-300 font-light">Pro</span></h1>
+                    <p class="text-xs text-amber-100">Calculateur Coûts & Nutrition</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto w-full md:w-auto justify-center pb-1 md:pb-0">
+                <button id="tab-btn-recipes" onclick="switchTab('recipes')" class="nav-tab active flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200">
+                    <i class="fa-solid fa-book-open text-amber-300"></i>
+                    <span class="hidden sm:inline">Recettes</span>
+                </button>
+                <button id="tab-btn-ingredients" onclick="switchTab('ingredients')" class="nav-tab flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm text-stone-100 hover:text-white hover:bg-amber-800 transition-all duration-200">
+                    <i class="fa-solid fa-jar text-amber-300"></i>
+                    <span class="hidden sm:inline">Liste des ingrédients</span>
+                </button>
+                <button id="tab-btn-quick" onclick="switchTab('quick')" class="nav-tab flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm text-stone-100 hover:text-white hover:bg-amber-800 transition-all duration-200">
+                    <i class="fa-solid fa-calculator text-amber-300"></i>
+                    <span class="hidden sm:inline">Simulateur Rapide</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+</header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24">
+
+        <!-- ================= RECIPES SECTION ================= -->
+        <section id="tab-recipes" class="tab-content space-y-6">
+            <!-- Header Bar with Controls -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-stone-200/80">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-900">Mes Recettes & Fiches Techniques</h2>
+                    <p class="text-sm text-stone-500">Calculez le coût matière, vos marges, les paramètres de cuisson et les macro.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="openRecipeModal()" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm shadow-amber-600/20 transition-all">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nouvelle Recette</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recipes List & Detail Split View -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Sidebar: Recipe Selection List -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-stone-200/80 p-4">
+                        <div class="relative mb-3">
+                            <i class="fa-solid fa-search absolute left-3 top-3 text-stone-400"></i>
+                            <input type="text" id="search-recipe" oninput="filterRecipes()" placeholder="Rechercher une recette..." class="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+                        </div>
+                        <div id="recipes-list" class="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+                            <!-- Dynamic Recipe Cards populate here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Detail View: Active Recipe Card & Analysis -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div id="recipe-detail-card" class="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
+                        <div class="p-12 text-center text-stone-400">
+                            <i class="fa-solid fa-utensils text-4xl mb-3 text-stone-300"></i>
+                            <p>Sélectionnez une recette ou créez-en une nouvelle pour voir la fiche technique.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= INGREDIENTS MERCURIALE SECTION ================= -->
+        <section id="tab-ingredients" class="tab-content hidden space-y-6">
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-stone-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-stone-900">Liste des ingrédients</h2>
+                    <p class="text-sm text-stone-500">Gérez les prix d'achat et les valeurs nutritionnelles pour 100g/ml d'ingrédient.</p>
+                </div>
+                <button onclick="openIngredientModal()" class="inline-flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Ajouter Ingrédient</span>
+                </button>
+            </div>
+
+            <!-- Ingredients Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
+                <div class="p-4 border-b border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-stone-400"></i>
+                        <input type="text" id="search-ingredient" oninput="renderIngredientsTable()" placeholder="Filtrer les ingrédients..." class="w-full pl-9 pr-4 py-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50">
+                    </div>
+                    <span id="ingredient-count-badge" class="text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-800 rounded-full border border-amber-200/60">
+                        0 Ingrédients enregistrés
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-stone-50/80 text-stone-500 text-xs font-semibold tracking-wider uppercase border-b border-stone-200/60">
+                                <th class="py-3 px-4">Ingrédient</th>
+                                <th class="py-3 px-4">Prix / kg ou L</th>
+                                <th class="py-3 px-4 text-center">Cal (100g)</th>
+                                <th class="py-3 px-4 text-center">Prot.</th>
+                                <th class="py-3 px-4 text-center">Gluc.</th>
+                                <th class="py-3 px-4 text-center">Lip.</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ingredients-table-body" class="divide-y divide-stone-100 text-sm">
+                            <!-- Ingrédients injectés en JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= QUICK SIMULATOR SECTION ================= -->
+        <section id="tab-quick" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200/80">
+                <h2 class="text-xl font-bold text-stone-900 mb-1">Simulateur Rapide de Prix & Coût</h2>
+                <p class="text-sm text-stone-500">Calculez rapidement le prix de vente idéal selon le coût total des matières et votre coef de marge souhaité.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Inputs Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200/80 space-y-4">
+                    <h3 class="font-bold text-stone-800 border-b pb-2 flex items-center space-x-2">
+                        <i class="fa-solid fa-sliders text-amber-600"></i>
+                        <span>Paramètres de Calcul</span>
+                    </h3>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1">Coût Total des Matières Premières (€)</label>
+                        <div class="relative">
+                            <input type="number" id="quick-cost" step="0.01" value="12.50" oninput="calculateQuickSimulator()" class="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-semibold text-stone-900 focus:ring-2 focus:ring-amber-500/50 outline-none">
+                            <span class="absolute right-3 top-3 text-stone-400 font-bold">€</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">Marge Brute Voulue (%)</label>
+                            <input type="number" id="quick-margin" step="1" value="70" oninput="calculateQuickSimulator()" class="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-semibold text-stone-900 focus:ring-2 focus:ring-amber-500/50 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">Taux de TVA (%)</label>
+                            <select id="quick-vat" onchange="calculateQuickSimulator()" class="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-semibold text-stone-900 focus:ring-2 focus:ring-amber-500/50 outline-none">
+                                <option value="5.5">5.5 % (Pain, Pâtisserie emportée)</option>
+                                <option value="10">10.0 % (Consommation sur place)</option>
+                                <option value="20">20.0 % (Standard / Boissons Alcool)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1">Nombre de pièces obtenues</label>
+                        <input type="number" id="quick-pieces" min="1" value="10" oninput="calculateQuickSimulator()" class="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-base font-semibold text-stone-900 focus:ring-2 focus:ring-amber-500/50 outline-none">
+                    </div>
+                </div>
+
+                <!-- Simulation Result Card -->
+                <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-xl flex flex-col justify-between space-y-6 relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 text-stone-800 text-9xl opacity-20 pointer-events-none">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/40">Résultats Estimés</span>
+                        <h4 class="text-lg font-bold mt-3 text-stone-100">Prix de Vente Recommandé</h4>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="p-4 bg-stone-800/90 rounded-xl border border-stone-700/60">
+                            <span class="text-xs text-stone-400 block mb-1">Prix de Vente Total TTC</span>
+                            <span id="quick-res-total-ttc" class="text-3xl font-extrabold text-amber-400">0.00 €</span>
+                            <span id="quick-res-total-ht" class="text-xs text-stone-400 block mt-1">(0.00 € HT)</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-stone-800/60 rounded-xl border border-stone-700/50">
+                                <span class="text-xs text-stone-400 block">Prix TTC / Pièce</span>
+                                <span id="quick-res-piece-ttc" class="text-xl font-bold text-stone-100">0.00 €</span>
+                            </div>
+                            <div class="p-3 bg-stone-800/60 rounded-xl border border-stone-700/50">
+                                <span class="text-xs text-stone-400 block">Marge Nette (€)</span>
+                                <span id="quick-res-profit" class="text-xl font-bold text-emerald-400">0.00 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-stone-400 border-t border-stone-800 pt-3">
+                        <i class="fa-solid fa-circle-info text-amber-500 mr-1"></i> Coef multiplicateur appliqué : <span id="quick-res-coef" class="font-bold text-white">0.0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODAL: INGREDIENT FORM ================= -->
+    <div id="modal-ingredient" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
+            <div class="px-6 py-4 bg-stone-900 text-white flex justify-between items-center">
+                <h3 id="modal-ingredient-title" class="font-bold text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-jar text-amber-500"></i>
+                    <span>Ajouter un Ingrédient</span>
+                </h3>
+                <button onclick="closeIngredientModal()" class="text-stone-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="ingredient-form" onsubmit="saveIngredient(event)" class="p-6 space-y-4">
+                <input type="hidden" id="ing-id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Nom de l'ingrédient</label>
+                    <input type="text" id="ing-name" required placeholder="Ex: Beurre AOP 82%" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Prix (€)</label>
+                        <input type="number" id="ing-price" step="0.01" min="0" required placeholder="Ex: 8.50" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Unité</label>
+                        <select id="ing-unit" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                            <option value="kg">par kg</option>
+                            <option value="L">par Litre</option>
+                            <option value="piece">par Pièce / Gousse</option>
+                        </select>
+                    </div>
+                </div>
+
+                <p class="text-xs font-bold text-amber-800 uppercase tracking-wider pt-2 border-t border-stone-100">Valeurs Nutritionnelles (pour 100g/ml)</p>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Calories (kcal)</label>
+                        <input type="number" id="ing-calories" step="0.1" min="0" required placeholder="717" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Protéines (g)</label>
+                        <input type="number" id="ing-protein" step="0.1" min="0" required placeholder="0.8" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Glucides (g)</label>
+                        <input type="number" id="ing-carbs" step="0.1" min="0" required placeholder="0.6" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">Lipides (g)</label>
+                        <input type="number" id="ing-fat" step="0.1" min="0" required placeholder="81" class="w-full p-2 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3 border-t border-stone-100">
+                    <button type="button" onclick="closeIngredientModal()" class="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 shadow-md shadow-amber-600/20">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: RECIPE FORM ================= -->
+    <div id="modal-recipe" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl my-8 overflow-hidden">
+            <div class="px-6 py-4 bg-stone-900 text-white flex justify-between items-center">
+                <h3 id="modal-recipe-title" class="font-bold text-base flex items-center space-x-2">
+                    <i class="fa-solid fa-book-open text-amber-500"></i>
+                    <span>Créer une Nouvelle Recette</span>
+                </h3>
+                <button onclick="closeRecipeModal()" class="text-stone-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="recipe-form" onsubmit="saveRecipe(event)" class="p-6 space-y-6">
+                <input type="hidden" id="recipe-id">
+
+                <!-- Meta Info -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Nom de la Recette</label>
+                        <input type="text" id="recipe-name" required placeholder="Ex: Pain au Chocolat Artisan" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Catégorie</label>
+                        <select id="recipe-category" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                            <option value="Boulangerie">Boulangerie</option>
+                            <option value="Viennoiserie">Viennoiserie</option>
+                            <option value="Pâtisserie">Pâtisserie</option>
+                            <option value="Traiteur">Traiteur</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Nb de Pièces Base</label>
+                        <input type="number" id="recipe-servings" min="1" value="10" required class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Marge Cible (%)</label>
+                        <input type="number" id="recipe-margin" min="0" max="95" value="70" required class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase mb-1">TVA (%)</label>
+                        <select id="recipe-vat" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                            <option value="5.5">5.5 %</option>
+                            <option value="10">10.0 %</option>
+                            <option value="20">20.0 %</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Baking info field -->
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Consignes & Paramètres de Cuisson</label>
+                    <input type="text" id="recipe-baking" placeholder="Ex: 20 mn @ 250°C puis 25 mn @ 200°C" class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+
+                <!-- Ingredients Selection List -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-stone-700 uppercase">Composition de la Recette</label>
+                        <button type="button" onclick="addIngredientRowToForm()" class="text-xs text-amber-700 font-bold hover:underline flex items-center space-x-1">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>Ajouter un ingrédient</span>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2 max-h-56 overflow-y-auto pr-1" id="recipe-ingredients-inputs">
+                        <!-- Dynamic Input Rows inserted via JS -->
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 uppercase mb-1">Procédé de Fabrication / Remarques</label>
+                    <textarea id="recipe-instructions" rows="3" placeholder="Description des étapes, pétrissage, repos..." class="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3 border-t border-stone-100">
+                    <button type="button" onclick="closeRecipeModal()" class="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 shadow-md shadow-amber-600/20">Enregistrer la recette</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initial Database for Bakery & Pastry with User's 41 Full Ingredients
+        let ingredients = [
+            { id: '1', name: 'Beurre', price: 12.50, unit: 'kg', calories: 717, protein: 0.8, carbs: 0.1, fat: 81.0 },
+            { id: '2', name: 'Sucre complet', price: 2.42, unit: 'kg', calories: 377, protein: 0.8, carbs: 93.0, fat: 0.0 },
+            { id: '3', name: 'Sucre blanc', price: 1.50, unit: 'kg', calories: 400, protein: 0.0, carbs: 100.0, fat: 0.0 },
+            { id: '4', name: 'Oeuf entier', price: 4.88, unit: 'kg', calories: 143, protein: 12.6, carbs: 0.7, fat: 9.5 },
+            { id: '5', name: 'Sel fin', price: 2.40, unit: 'kg', calories: 0, protein: 0.0, carbs: 0.0, fat: 0.0 },
+            { id: '6', name: 'Poudre d\'amande', price: 11.30, unit: 'kg', calories: 600, protein: 21.0, carbs: 10.0, fat: 50.0 },
+            { id: '7', name: 'Farine T55', price: 1.50, unit: 'kg', calories: 364, protein: 10.0, carbs: 76.0, fat: 1.0 },
+            { id: '8', name: 'Lait entier', price: 1.79, unit: 'L', calories: 64, protein: 3.2, carbs: 4.8, fat: 3.6 },
+            { id: '9', name: 'Gousse de vanille', price: 2.00, unit: 'piece', calories: 288, protein: 0.1, carbs: 12.5, fat: 0.1 },
+            { id: '10', name: 'Fécule de maïs', price: 4.00, unit: 'kg', calories: 357, protein: 0.3, carbs: 88.0, fat: 0.1 },
+            { id: '11', name: 'Crème fraiche 40%', price: 4.00, unit: 'kg', calories: 380, protein: 2.2, carbs: 2.8, fat: 40.0 },
+            { id: '12', name: 'Sucre cassonade', price: 2.69, unit: 'kg', calories: 380, protein: 0.0, carbs: 98.0, fat: 0.0 },
+            { id: '13', name: 'Levure sèche', price: 20.00, unit: 'kg', calories: 325, protein: 40.0, carbs: 40.0, fat: 6.0 },
+            { id: '14', name: 'Sucre perlé', price: 8.57, unit: 'kg', calories: 400, protein: 0.0, carbs: 100.0, fat: 0.0 },
+            { id: '15', name: 'Citron', price: 0.00, unit: 'piece', calories: 29, protein: 1.1, carbs: 9.3, fat: 0.3 },
+            { id: '16', name: 'Rhum', price: 20.00, unit: 'L', calories: 231, protein: 0.0, carbs: 0.0, fat: 0.0 },
+            { id: '17', name: 'Miel', price: 15.00, unit: 'kg', calories: 304, protein: 0.3, carbs: 82.0, fat: 0.0 },
+            { id: '18', name: 'Levure chimique', price: 3.00, unit: 'kg', calories: 53, protein: 0.0, carbs: 28.0, fat: 0.0 },
+            { id: '19', name: 'Eau', price: 0.00, unit: 'L', calories: 0, protein: 0.0, carbs: 0.0, fat: 0.0 },
+            { id: '20', name: 'Farine T80', price: 3.84, unit: 'kg', calories: 350, protein: 11.5, carbs: 72.0, fat: 1.5 },
+            { id: '21', name: 'Fleur de sel', price: 15.00, unit: 'kg', calories: 0, protein: 0.0, carbs: 0.0, fat: 0.0 },
+            { id: '22', name: 'Levain', price: 0.75, unit: 'kg', calories: 160, protein: 5.0, carbs: 32.0, fat: 1.0 },
+            { id: '23', name: 'Sucre vergeoise', price: 4.00, unit: 'kg', calories: 380, protein: 0.0, carbs: 98.0, fat: 0.0 },
+            { id: '24', name: 'Chocolat noir', price: 15.75, unit: 'kg', calories: 545, protein: 5.5, carbs: 54.0, fat: 31.0 },
+            { id: '25', name: 'Chocolat blanc de couverture', price: 20.00, unit: 'kg', calories: 570, protein: 6.0, carbs: 59.0, fat: 35.0 },
+            { id: '26', name: 'Chocolat noir de couverture', price: 23.86, unit: 'kg', calories: 550, protein: 7.8, carbs: 46.0, fat: 37.0 },
+            { id: '27', name: 'Chocolat lait de couverture', price: 21.75, unit: 'kg', calories: 560, protein: 7.5, carbs: 54.0, fat: 35.0 },
+            { id: '28', name: 'Framboises', price: 20.00, unit: 'kg', calories: 52, protein: 1.2, carbs: 12.0, fat: 0.7 },
+            { id: '29', name: 'Extrait de vanille liquide', price: 270.00, unit: 'L', calories: 288, protein: 0.1, carbs: 12.5, fat: 0.1 },
+            { id: '30', name: 'Crème liquide entière', price: 4.00, unit: 'L', calories: 335, protein: 2.3, carbs: 3.2, fat: 35.0 },
+            { id: '31', name: 'Sucre glace', price: 3.00, unit: 'kg', calories: 400, protein: 0.0, carbs: 100.0, fat: 0.0 },
+            { id: '32', name: 'Zest citron', price: 0.00, unit: 'piece', calories: 47, protein: 1.5, carbs: 16.0, fat: 0.3 },
+            { id: '33', name: 'Chocolat au lait', price: 21.75, unit: 'kg', calories: 535, protein: 7.6, carbs: 59.0, fat: 30.0 },
+            { id: '34', name: 'Cacao amer', price: 15.08, unit: 'kg', calories: 228, protein: 20.0, carbs: 58.0, fat: 14.0 },
+            { id: '35', name: 'Pistache', price: 119.00, unit: 'kg', calories: 560, protein: 20.0, carbs: 28.0, fat: 45.0 },
+            { id: '36', name: 'Noisette', price: 37.00, unit: 'kg', calories: 628, protein: 15.0, carbs: 17.0, fat: 61.0 },
+            { id: '37', name: 'Sésame noir', price: 10.00, unit: 'kg', calories: 573, protein: 18.0, carbs: 23.0, fat: 50.0 },
+            { id: '38', name: 'Miel Premium', price: 25.00, unit: 'kg', calories: 304, protein: 0.3, carbs: 82.0, fat: 0.0 },
+            { id: '39', name: 'Farine de seigle', price: 2.90, unit: 'kg', calories: 338, protein: 9.0, carbs: 74.0, fat: 1.7 },
+            { id: '40', name: 'Farine Manitoba', price: 7.22, unit: 'kg', calories: 355, protein: 14.0, carbs: 70.0, fat: 1.2 },
+            { id: '41', name: 'Jaune d\'oeuf', price: 11.22, unit: 'kg', calories: 322, protein: 16.0, carbs: 0.6, fat: 27.0 }
+        ];
+
+        // All 19 Complete User Recipes
+        let recipes = [
+            {
+                id: 'r1',
+                name: 'Pâte sucrée',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: '20 mn @ 180°C si pâte seule',
+                instructions: 'Sabler le beurre avec les sucres, le sel, et la poudre d\'amande. Incorporer les oeufs. Incorporer la farine sans trop travailler la pâte.',
+                items: [
+                    { ingredientId: '1', quantity: 110 },
+                    { ingredientId: '2', quantity: 45 },
+                    { ingredientId: '3', quantity: 45 },
+                    { ingredientId: '4', quantity: 56 },
+                    { ingredientId: '5', quantity: 2 },
+                    { ingredientId: '6', quantity: 30 },
+                    { ingredientId: '7', quantity: 250 }
+                ]
+            },
+            {
+                id: 'r2',
+                name: 'Appareil à flan vanille',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '45 mn pour Ø20H6 - 53 mn pour Ø24H6 @ 190°C',
+                instructions: 'Chauffer le lait avec la vanille et moitié du sucre. Blanchir les oeufs avec l\'autre moitié du sucre et la fécule. Verser le lait chaud, épaissir sur le feu puis incorporer le beurre. Incorporer la crème après refroidissement.',
+                items: [
+                    { ingredientId: '8', quantity: 885 },
+                    { ingredientId: '9', quantity: 1 },
+                    { ingredientId: '4', quantity: 300 },
+                    { ingredientId: '3', quantity: 135 },
+                    { ingredientId: '10', quantity: 70 },
+                    { ingredientId: '11', quantity: 165 },
+                    { ingredientId: '1', quantity: 70 }
+                ]
+            },
+            {
+                id: 'r3',
+                name: 'Gaufre liégeoise',
+                category: 'Viennoiserie',
+                servings: 12,
+                margin: 70,
+                vat: 5.5,
+                baking: 'Plaque gaufrier 3-4 mn',
+                instructions: 'Pétrir la farine, les oeufs, le lait, le sel et la levure. Incorporer le beurre. Pointage 1-2h. Puis ajouter le sucre perlé délicatement à la fin. Faire des boules de 100g',
+                items: [
+                    { ingredientId: '1', quantity: 250 },
+                    { ingredientId: '12', quantity: 35 },
+                    { ingredientId: '4', quantity: 100 },
+                    { ingredientId: '5', quantity: 4 },
+                    { ingredientId: '13', quantity: 8 },
+                    { ingredientId: '7', quantity: 500 },
+                    { ingredientId: '14', quantity: 160 },
+                    { ingredientId: '8', quantity: 250 }
+                ]
+            },
+            {
+                id: 'r4',
+                name: 'Cake citron',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: '40 mn @ 180°C',
+                instructions: 'Fouetter les oeufs et le sucre avec le zest. Ajouter la crème, la farine et la levure, puis le rhum et enfin le beurre fondu.',
+                items: [
+                    { ingredientId: '1', quantity: 65 },
+                    { ingredientId: '3', quantity: 150 },
+                    { ingredientId: '4', quantity: 150 },
+                    { ingredientId: '5', quantity: 1 },
+                    { ingredientId: '15', quantity: 1 },
+                    { ingredientId: '7', quantity: 190 },
+                    { ingredientId: '11', quantity: 95 },
+                    { ingredientId: '16', quantity: 30 }
+                ]
+            },
+            {
+                id: 'r5',
+                name: 'Madeleine',
+                category: 'Pâtisserie',
+                servings: 15,
+                margin: 75,
+                vat: 5.5,
+                baking: '4 mn @ 200°C puis 6 mn @ 180°C',
+                instructions: 'Mélanger oeufs, sucre et miel. Ajouter la farine et la levure, puis le beurre noisette. Repos au frais obligatoire avant cuisson.',
+                items: [
+                    { ingredientId: '1', quantity: 150 },
+                    { ingredientId: '3', quantity: 120 },
+                    { ingredientId: '4', quantity: 100 },
+                    { ingredientId: '17', quantity: 15 },
+                    { ingredientId: '18', quantity: 5 },
+                    { ingredientId: '7', quantity: 150 }
+                ]
+            },
+            {
+                id: 'r6',
+                name: 'Brioche',
+                category: 'Viennoiserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: '25 mn @ 170°C',
+                instructions: 'Pétrir farine, sucre, sel, levure et oeufs. Incorporer le beurre en dés quand la pâte se décolle. Pousse et cuisson.',
+                items: [
+                    { ingredientId: '7', quantity: 320 },
+                    { ingredientId: '1', quantity: 130 },
+                    { ingredientId: '4', quantity: 200 },
+                    { ingredientId: '3', quantity: 40 },
+                    { ingredientId: '13', quantity: 5 },
+                    { ingredientId: '5', quantity: 7 }
+                ]
+            },
+            {
+                id: 'r7',
+                name: 'Pain de campagne',
+                category: 'Boulangerie',
+                servings: 4,
+                margin: 80,
+                vat: 5.5,
+                baking: '20 mn @ 250°C puis 25 mn @ 200°C',
+                instructions: 'Mélanger eau, farine T80, levain et fleur de sel. Pétrissage doux, longues fermentations avec rabats.',
+                items: [
+                    { ingredientId: '19', quantity: 1000 },
+                    { ingredientId: '20', quantity: 1500 },
+                    { ingredientId: '21', quantity: 27 },
+                    { ingredientId: '22', quantity: 300 }
+                ]
+            },
+            {
+                id: 'r8',
+                name: 'Cookie',
+                category: 'Pâtisserie',
+                servings: 12,
+                margin: 75,
+                vat: 5.5,
+                baking: '12 mn @ 180°C',
+                instructions: 'Crémer le beurre avec les sucres. Ajouter l\'oeuf, puis les poudres (farine, fécule, sel, levure) et enfin le chocolat noir.',
+                items: [
+                    { ingredientId: '1', quantity: 230 },
+                    { ingredientId: '4', quantity: 100 },
+                    { ingredientId: '7', quantity: 375 },
+                    { ingredientId: '3', quantity: 50 },
+                    { ingredientId: '23', quantity: 110 },
+                    { ingredientId: '5', quantity: 3 },
+                    { ingredientId: '18', quantity: 3 },
+                    { ingredientId: '24', quantity: 350 },
+                    { ingredientId: '10', quantity: 3 }
+                ]
+            },
+            {
+                id: 'r9',
+                name: 'Brownie levain',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: '20 mn @ 200°C',
+                instructions: 'Fondre le chocolat avec le beurre. Fouetter les oeufs et le sucre complet. Ajouter le levain puis le chocolat.',
+                items: [
+                    { ingredientId: '24', quantity: 113 },
+                    { ingredientId: '2', quantity: 220 },
+                    { ingredientId: '1', quantity: 95 },
+                    { ingredientId: '4', quantity: 150 },
+                    { ingredientId: '22', quantity: 150 }
+                ]
+            },
+            {
+                id: 'r10',
+                name: 'Crème d\'amandes au citron',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: 'Cuisson intégrée en tarte',
+                instructions: 'Crémer le beurre et le sucre glace. Ajouter la poudre d\'amande, les oeufs et le zest de citron.',
+                items: [
+                    { ingredientId: '6', quantity: 50 },
+                    { ingredientId: '1', quantity: 50 },
+                    { ingredientId: '31', quantity: 50 },
+                    { ingredientId: '4', quantity: 30 },
+                    { ingredientId: '32', quantity: 1 }
+                ]
+            },
+            {
+                id: 'r11',
+                name: 'Ganache vanille',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: 'Sans cuisson',
+                instructions: 'Chauffer la crème avec la vanille. Emulsionner sur le chocolat blanc et le beurre. Ajouter les framboises au montage.',
+                items: [
+                    { ingredientId: '30', quantity: 75 },
+                    { ingredientId: '1', quantity: 75 },
+                    { ingredientId: '25', quantity: 150 },
+                    { ingredientId: '9', quantity: 1 },
+                    { ingredientId: '29', quantity: 5 },
+                    { ingredientId: '28', quantity: 187.5 }
+                ]
+            },
+            {
+                id: 'r12',
+                name: 'Fondant chocolat',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '40 mn @ 145°C',
+                instructions: 'Fondre chocolats et beurre au bain-marie. Blanchir oeufs et sucre. Mélanger tout doucement avec la farine, le cacao et la fleur de sel.',
+                items: [
+                    { ingredientId: '4', quantity: 300 },
+                    { ingredientId: '3', quantity: 130 },
+                    { ingredientId: '7', quantity: 100 },
+                    { ingredientId: '24', quantity: 200 },
+                    { ingredientId: '33', quantity: 200 },
+                    { ingredientId: '1', quantity: 200 },
+                    { ingredientId: '21', quantity: 6 },
+                    { ingredientId: '34', quantity: 5 }
+                ]
+            },
+            {
+                id: 'r13',
+                name: 'Appareil à flan pistache',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '45 à 53 mn @ 190°C',
+                instructions: 'Incorporer le praliné de pistache une fois l\'appareil réalisé .',
+                items: [
+                    { ingredientId: '35', quantity: 75 },
+                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: '10', quantity: 70 },
+                    { ingredientId: '11', quantity: 165 },
+                    { ingredientId: '8', quantity: 885 },
+                    { ingredientId: '4', quantity: 250 }
+                ]
+            },
+            {
+                id: 'r14',
+                name: 'Appareil à flan sésame noir',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '45 à 53 mn @ 190°C',
+                instructions: 'Incorporer la pâte de sésame noir une fois l\'appareil réalisé.',
+                items: [
+                    { ingredientId: '37', quantity: 75 },
+                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: '10', quantity: 70 },
+                    { ingredientId: '11', quantity: 165 },
+                    { ingredientId: '8', quantity: 885 },
+                    { ingredientId: '4', quantity: 250 }
+                ]
+            },
+            {
+                id: 'r15',
+                name: 'Appareil à flan praliné noisette',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '45 à 53 mn @ 190°C',
+                instructions: 'Incorporer le praliné une fois l\'appareil réalisé.',
+                items: [
+                    { ingredientId: '36', quantity: 75 },
+                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: '10', quantity: 70 },
+                    { ingredientId: '11', quantity: 165 },
+                    { ingredientId: '8', quantity: 885 },
+                    { ingredientId: '4', quantity: 250 }
+                ]
+            },
+            {
+                id: 'r16',
+                name: 'Pain d\'épice',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '3 heures @ 130°C',
+                instructions: 'Mélanger avec la farine de seigle et les épices. Cuisson très douce et longue.',
+                items: [
+                    { ingredientId: '17', quantity: 250 },
+                    { ingredientId: '39', quantity: 250 }
+                ]
+            },
+			{
+			id: 'r17',
+			name: 'Brioche au levain gianduja',
+			category: 'Viennoiserie',
+			servings: 1,
+			margin: 70,
+			vat: 5.5,
+			baking: '55-65 min @ 150-155°C au four ventilé (Température à cœur : 93°C)',
+			instructions: "1. Mélanger le miel et l'eau à 20°C pour dissoudre le miel.\n2. Ajouter le levain, la farine et pétrir pour créer un excellent réseau de gluten (15').\n3. Ajouter les jaunes en deux ou trois fois en restructurant parfaitement le réseau entre chaque ajout (15' environ).\n4. Ajouter le sucre en deux fois (8').\n5. Ajouter le sel (2').\n6. Incorporer le beurre mou en trois ou quatre fois en 2e vitesse, jusqu'à parfaite restructuration de la pâte (2 à 4'). La température de la pâte doit être de 25 à 26°C en fin de pétrissage.\n7. Laisser reposer 20 min en cuve.\n8. Diviser la pâte en gros pâtons de 1 kg, bouler et mettre en grands moules adaptés.\n9. Laisser pousser 12 à 16h à l'étuve, à 26°C avec 50% d'hygrométrie.\n10. Faire un glaçage classique avant enfournement, cuire 45 à 50 min à 150-155°C au four à soles. Piquer et retourner à la sortie du four, laisser reposer à l'envers 3h minimum.",
+			items: [
+				{ ingredientId: '7', quantity: 267 },
+				{ ingredientId: '19', quantity: 120 },
+				{ ingredientId: '22', quantity: 133 },
+				{ ingredientId: '2', quantity: 112 },
+				{ ingredientId: '17', quantity: 13.3 },
+				{ ingredientId: '4', quantity: 139 },
+				{ ingredientId: '1', quantity: 133 },
+				{ ingredientId: '5', quantity: 4 },
+				{ ingredientId: 'r18', quantity: 80 }
+			]
+			},	
+            {
+                id: 'r18',
+                name: 'Gianduja',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 70,
+                vat: 5.5,
+                baking: 'Sans cuisson',
+                instructions: 'Torréfaction des noisettes 20 mn @ 180°C. Broyer les noisettes avec le sucre glace jusqu\'à obtention d\'une pâte fluide. Ajouter le chocolat au lait fondu.',
+                items: [
+                    { ingredientId: '36', quantity: 100 },
+                    { ingredientId: '31', quantity: 60 },
+                    { ingredientId: '33', quantity: 160 }
+                ]
+            },
+            {
+                id: 'r19',
+                name: 'Flan vanille jaune d\'oeuf',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '45 à 53 mn @ 190°C',
+                instructions: 'Recette ultra crémeuse réalisée uniquement avec des jaunes d\'oeufs pour une texture fondante inégalée.',
+                items: [
+                    { ingredientId: '8', quantity: 885 },
+                    { ingredientId: '9', quantity: 1 },
+                    { ingredientId: '41', quantity: 150 },
+                    { ingredientId: '3', quantity: 135 },
+                    { ingredientId: '10', quantity: 70 },
+                    { ingredientId: '11', quantity: 165 },
+                    { ingredientId: '1', quantity: 70 }
+                ]
+            }
+        ];
+
+        let activeRecipeId = 'r1';
+        let currentBatchMultiplier = 1;
+        let nutritionChart = null;
+
+        // Initialize App on Load
+        window.onload = function() {
+            loadFromLocalStorage();
+            renderIngredientsTable();
+            renderRecipesList();
+            renderActiveRecipe();
+            calculateQuickSimulator();
+        };
+
+        // Local Storage Helper
+        function saveToLocalStorage() {
+            localStorage.setItem('bm_ingredients', JSON.stringify(ingredients));
+            localStorage.setItem('bm_recipes', JSON.stringify(recipes));
+        }
+
+        function loadFromLocalStorage() {
+            const savedIngs = localStorage.getItem('bm_ingredients');
+            const savedRecs = localStorage.getItem('bm_recipes');
+            if (savedIngs) ingredients = JSON.parse(savedIngs);
+            if (savedRecs) recipes = JSON.parse(savedRecs);
+        }
+
+        // ================= TAB NAVIGATION =================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('bg-stone-800', 'text-white');
+                el.classList.add('text-stone-300');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.add('bg-stone-800', 'text-white');
+            
+            if (tabName === 'recipes') renderActiveRecipe();
+        }
+
+        // ================= INGREDIENT MERCURIALE LOGIC =================
+        function renderIngredientsTable() {
+            const tbody = document.getElementById('ingredients-table-body');
+            const filter = document.getElementById('search-ingredient').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = ingredients.filter(i => i.name.toLowerCase().includes(filter));
+            document.getElementById('ingredient-count-badge').textContent = `${filtered.length} Ingrédient(s)`;
+
+            filtered.forEach(ing => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-stone-50/80 transition-colors';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-stone-900">${ing.name}</td>
+                    <td class="py-3 px-4 font-bold text-amber-800">${ing.price.toFixed(2)} € / ${ing.unit}</td>
+                    <td class="py-3 px-4 text-center text-stone-600">${ing.calories} kcal</td>
+                    <td class="py-3 px-4 text-center text-stone-600">${ing.protein}g</td>
+                    <td class="py-3 px-4 text-center text-stone-600">${ing.carbs}g</td>
+                    <td class="py-3 px-4 text-center text-stone-600">${ing.fat}g</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="openIngredientModal('${ing.id}')" class="text-stone-400 hover:text-amber-600 p-1"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteIngredient('${ing.id}')" class="text-stone-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openIngredientModal(id = null) {
+            const modal = document.getElementById('modal-ingredient');
+            const form = document.getElementById('ingredient-form');
+            form.reset();
+
+            if (id) {
+                const ing = ingredients.find(i => i.id === id);
+                if (ing) {
+                    document.getElementById('modal-ingredient-title').innerHTML = '<i class="fa-solid fa-pen text-amber-500"></i><span> Modifier l\'Ingrédient</span>';
+                    document.getElementById('ing-id').value = ing.id;
+                    document.getElementById('ing-name').value = ing.name;
+                    document.getElementById('ing-price').value = ing.price;
+                    document.getElementById('ing-unit').value = ing.unit;
+                    document.getElementById('ing-calories').value = ing.calories;
+                    document.getElementById('ing-protein').value = ing.protein;
+                    document.getElementById('ing-carbs').value = ing.carbs;
+                    document.getElementById('ing-fat').value = ing.fat;
+                }
+            } else {
+                document.getElementById('modal-ingredient-title').innerHTML = '<i class="fa-solid fa-jar text-amber-500"></i><span> Ajouter un Ingrédient</span>';
+                document.getElementById('ing-id').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeIngredientModal() {
+            document.getElementById('modal-ingredient').classList.add('hidden');
+        }
+
+        function saveIngredient(e) {
+            e.preventDefault();
+            const id = document.getElementById('ing-id').value;
+            const newIng = {
+                id: id || Date.now().toString(),
+                name: document.getElementById('ing-name').value.trim(),
+                price: parseFloat(document.getElementById('ing-price').value) || 0,
+                unit: document.getElementById('ing-unit').value,
+                calories: parseFloat(document.getElementById('ing-calories').value) || 0,
+                protein: parseFloat(document.getElementById('ing-protein').value) || 0,
+                carbs: parseFloat(document.getElementById('ing-carbs').value) || 0,
+                fat: parseFloat(document.getElementById('ing-fat').value) || 0
+            };
+
+            if (id) {
+                const index = ingredients.findIndex(i => i.id === id);
+                if (index !== -1) ingredients[index] = newIng;
+            } else {
+                ingredients.push(newIng);
+            }
+
+            saveToLocalStorage();
+            renderIngredientsTable();
+            renderActiveRecipe();
+            closeIngredientModal();
+        }
+
+        function deleteIngredient(id) {
+            if (confirm("Voulez-vous vraiment supprimer cet ingrédient ?")) {
+                ingredients = ingredients.filter(i => i.id !== id);
+                saveToLocalStorage();
+                renderIngredientsTable();
+                renderActiveRecipe();
+            }
+        }
+
+        // ================= RECIPES MANAGEMENTS LOGIC =================
+        function renderRecipesList() {
+            const container = document.getElementById('recipes-list');
+            const search = document.getElementById('search-recipe').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = recipes.filter(r => r.name.toLowerCase().includes(search) || r.category.toLowerCase().includes(search));
+
+            filtered.forEach(recipe => {
+                const isSelected = recipe.id === activeRecipeId;
+                const card = document.createElement('div');
+                card.onclick = () => { activeRecipeId = recipe.id; currentBatchMultiplier = 1; renderRecipesList(); renderActiveRecipe(); };
+                card.className = `p-4 rounded-xl cursor-pointer border transition-all ${isSelected ? 'bg-amber-50 border-amber-500/80 ring-2 ring-amber-500/20 shadow-sm' : 'bg-white border-stone-200/70 hover:border-amber-300'}`;
+
+                const summary = calculateRecipeTotals(recipe, 1);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-stone-100 text-stone-600">${recipe.category}</span>
+                        <span class="text-xs font-bold text-amber-800">${summary.costPerPiece.toFixed(2)} € / pce</span>
+                    </div>
+                    <h3 class="font-bold text-stone-900 mt-2">${recipe.name}</h3>
+                    <div class="flex justify-between items-center text-xs text-stone-500 mt-2">
+                        <span><i class="fa-solid fa-box text-stone-400 mr-1"></i> ${recipe.servings} pces</span>
+                        <span class="font-semibold text-stone-700">Coût: ${summary.totalCost.toFixed(2)} €</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterRecipes() {
+            renderRecipesList();
+        }
+
+        // HELPER FOR RESOLVING INGREDIENT OR SUB-RECIPE
+        function resolveItemDetails(itemId, quantity, visited = new Set()) {
+            if (visited.has(itemId)) {
+                return { name: 'Erreur boucle', unit: 'g', unitPrice: 0, cost: 0, weight: 0, cal: 0, prot: 0, carb: 0, fat: 0, isSubRecipe: false };
+            }
+            visited.add(itemId);
+
+            // 1. Check in raw ingredients
+            const ing = ingredients.find(i => i.id === itemId);
+            if (ing) {
+                let cost = 0;
+                let weight = 0;
+                if (ing.unit === 'piece') {
+                    cost = quantity * ing.price;
+                } else {
+                    cost = (quantity / 1000) * ing.price;
+                    weight = quantity;
+                }
+                return {
+                    name: ing.name,
+                    unit: ing.unit,
+                    unitPrice: ing.price,
+                    cost: cost,
+                    weight: weight,
+                    cal: (quantity / 100) * (ing.calories || 0),
+                    prot: (quantity / 100) * (ing.protein || 0),
+                    carb: (quantity / 100) * (ing.carbs || 0),
+                    fat: (quantity / 100) * (ing.fat || 0),
+                    isSubRecipe: false
+                };
+            }
+
+            // 2. Check in recipes (Sub-recipe)
+            const subRecipe = recipes.find(r => r.id === itemId);
+            if (subRecipe) {
+                let subTotalWeight = 0;
+                let subTotalCost = 0;
+                let subCal = 0, subProt = 0, subCarb = 0, subFat = 0;
+
+                subRecipe.items.forEach(subItem => {
+                    const res = resolveItemDetails(subItem.ingredientId, subItem.quantity, new Set(visited));
+                    subTotalCost += res.cost;
+                    subTotalWeight += res.weight;
+                    subCal += res.cal;
+                    subProt += res.prot;
+                    subCarb += res.carb;
+                    subFat += res.fat;
+                });
+
+                let unitPricePerKg = subTotalWeight > 0 ? (subTotalCost / (subTotalWeight / 1000)) : 0;
+                let factor = subTotalWeight > 0 ? (quantity / subTotalWeight) : 0;
+
+                return {
+                    name: `Recette: ${subRecipe.name}`,
+                    unit: 'g',
+                    unitPrice: unitPricePerKg,
+                    cost: subTotalCost * factor,
+                    weight: quantity,
+                    cal: subCal * factor,
+                    prot: subProt * factor,
+                    carb: subCarb * factor,
+                    fat: subFat * factor,
+                    isSubRecipe: true
+                };
+            }
+
+            return { name: 'Inconnu', unit: 'g', unitPrice: 0, cost: 0, weight: 0, cal: 0, prot: 0, carb: 0, fat: 0, isSubRecipe: false };
+        }
+
+        // CALCULATOR ENGINE (SUPPORTING SUB-RECIPES)
+        function calculateRecipeTotals(recipe, multiplier = 1) {
+            let totalWeight = 0;
+            let totalCost = 0;
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+
+            const itemsWithDetails = recipe.items.map(item => {
+                const scaledQty = item.quantity * multiplier;
+                const details = resolveItemDetails(item.ingredientId, scaledQty);
+
+                totalCost += details.cost;
+                totalWeight += details.weight;
+                totalCalories += details.cal;
+                totalProtein += details.prot;
+                totalCarbs += details.carb;
+                totalFat += details.fat;
+
+                return {
+                    ...item,
+                    scaledQty,
+                    ingredientName: details.name,
+                    unit: details.unit,
+                    unitPrice: details.unitPrice,
+                    cost: details.cost,
+                    cal: details.cal,
+                    prot: details.prot,
+                    carb: details.carb,
+                    fat: details.fat,
+                    isSubRecipe: details.isSubRecipe
+                };
+            });
+
+            const scaledServings = recipe.servings * multiplier;
+            const costPerPiece = scaledServings > 0 ? totalCost / scaledServings : 0;
+            
+            const marginFraction = (recipe.margin || 70) / 100;
+            const recommendedSalesPriceHT = marginFraction < 1 ? totalCost / (1 - marginFraction) : totalCost;
+            const vatRate = (recipe.vat || 5.5) / 100;
+            const recommendedSalesPriceTTC = recommendedSalesPriceHT * (1 + vatRate);
+            
+            const pricePerPieceTTC = scaledServings > 0 ? recommendedSalesPriceTTC / scaledServings : 0;
+
+            const per100g = {
+                calories: totalWeight > 0 ? (totalCalories / totalWeight) * 100 : 0,
+                protein: totalWeight > 0 ? (totalProtein / totalWeight) * 100 : 0,
+                carbs: totalWeight > 0 ? (totalCarbs / totalWeight) * 100 : 0,
+                fat: totalWeight > 0 ? (totalFat / totalWeight) * 100 : 0
+            };
+
+            const perPortion = {
+                weight: scaledServings > 0 ? totalWeight / scaledServings : 0,
+                calories: scaledServings > 0 ? totalCalories / scaledServings : 0,
+                protein: scaledServings > 0 ? totalProtein / scaledServings : 0,
+                carbs: scaledServings > 0 ? totalCarbs / scaledServings : 0,
+                fat: scaledServings > 0 ? totalFat / scaledServings : 0
+            };
+
+            return {
+                totalWeight,
+                totalCost,
+                costPerPiece,
+                recommendedSalesPriceTTC,
+                pricePerPieceTTC,
+                totalCalories,
+                totalProtein,
+                totalCarbs,
+                totalFat,
+                per100g,
+                perPortion,
+                itemsWithDetails,
+                scaledServings
+            };
+        }
+
+        function changeBatchMultiplier(val) {
+            currentBatchMultiplier = Math.max(0.1, parseFloat(val) || 1);
+            renderActiveRecipe();
+        }
+
+        // RENDER DETAILED RECIPE VIEW
+        function renderActiveRecipe() {
+            const recipe = recipes.find(r => r.id === activeRecipeId);
+            const container = document.getElementById('recipe-detail-card');
+
+            if (!recipe) {
+                container.innerHTML = `
+                    <div class="p-12 text-center text-stone-400">
+                        <i class="fa-solid fa-utensils text-4xl mb-3 text-stone-300"></i>
+                        <p>Aucune recette sélectionnée.</p>
+                    </div>`;
+                return;
+            }
+
+            const data = calculateRecipeTotals(recipe, currentBatchMultiplier);
+
+            container.innerHTML = `
+                <!-- Recipe Header -->
+                <div class="p-6 bg-stone-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs uppercase font-bold tracking-wider px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-md border border-amber-500/30">${recipe.category}</span>
+                            <span class="text-xs text-stone-400">Poids Total : <strong>${(data.totalWeight / 1000).toFixed(2)} kg</strong></span>
+                        </div>
+                        <h2 class="text-2xl font-black mt-1 text-stone-100">${recipe.name}</h2>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 no-print">
+                        <button onclick="openRecipeModal('${recipe.id}')" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-pen mr-1"></i> Modifier
+                        </button>
+                        <button onclick="printRecipe()" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md transition-all">
+                            <i class="fa-solid fa-print mr-1"></i> Imprimer Fiche
+                        </button>
+                        <button onclick="deleteRecipe('${recipe.id}')" class="px-3 py-2 bg-red-950/50 hover:bg-red-900 text-red-300 rounded-xl text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Multiplier & Baking Bar -->
+                <div class="bg-amber-50/80 p-4 border-b border-amber-200/60 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-3 no-print">
+                            <label class="text-xs font-bold uppercase text-amber-900">Multiplicateur de Fournée :</label>
+                            <div class="flex items-center space-x-1 bg-white p-1 rounded-xl border border-amber-200 shadow-sm">
+                                <button onclick="changeBatchMultiplier(${currentBatchMultiplier - 1 <= 0 ? 0.5 : currentBatchMultiplier - 1})" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-amber-100 text-stone-700 font-bold flex items-center justify-center">-</button>
+                                <input type="number" step="0.5" min="0.1" value="${currentBatchMultiplier}" onchange="changeBatchMultiplier(this.value)" class="w-16 text-center font-extrabold text-stone-900 bg-transparent outline-none">
+                                <button onclick="changeBatchMultiplier(${currentBatchMultiplier + 1})" class="w-8 h-8 rounded-lg bg-stone-100 hover:bg-amber-100 text-stone-700 font-bold flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-amber-900 font-medium">
+                            Production active : <span class="font-extrabold text-amber-800 text-base">${data.scaledServings} pièces</span> (${recipe.servings} pces × ${currentBatchMultiplier})
+                        </div>
+                    </div>
+
+                    <!-- Cuisson séparée -->
+                    ${recipe.baking ? `
+                        <div class="flex items-center space-x-2 text-xs font-bold text-amber-900 bg-white/80 p-2.5 rounded-lg border border-amber-200/80">
+                            <i class="fa-solid fa-fire-burner text-amber-600 text-sm"></i>
+                            <span>Consignes de Cuisson :</span>
+                            <span class="font-normal text-stone-700">${recipe.baking}</span>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Financial Metrics Banner -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-stone-50/50 border-b border-stone-200/60">
+                    <div class="p-4 bg-white rounded-xl border border-stone-200/80 shadow-sm">
+                        <span class="text-xs text-stone-500 font-medium block">Coût Matière Total</span>
+                        <span class="text-xl sm:text-2xl font-black text-stone-900">${data.totalCost.toFixed(2)} €</span>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl border border-stone-200/80 shadow-sm">
+                        <span class="text-xs text-stone-500 font-medium block">Coût Revient / Pièce</span>
+                        <span class="text-xl sm:text-2xl font-black text-amber-700">${data.costPerPiece.toFixed(2)} €</span>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl border border-stone-200/80 shadow-sm">
+                        <span class="text-xs text-stone-500 font-medium block">Prix Conseil / Pièce (TTC)</span>
+                        <span class="text-xl sm:text-2xl font-black text-emerald-600">${data.pricePerPieceTTC.toFixed(2)} €</span>
+                    </div>
+                    <div class="p-4 bg-white rounded-xl border border-stone-200/80 shadow-sm">
+                        <span class="text-xs text-stone-500 font-medium block">CA Total Est. (TTC)</span>
+                        <span class="text-xl sm:text-2xl font-black text-stone-900">${data.recommendedSalesPriceTTC.toFixed(2)} €</span>
+                        <span class="text-[10px] text-stone-400">Marge: ${recipe.margin}% | TVA: ${recipe.vat}%</span>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Ingredients Breakdown Table -->
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-stone-700 mb-3 flex items-center space-x-2">
+                            <i class="fa-solid fa-list-check text-amber-600"></i>
+                            <span>Ingrédients & Quantités Ajustées</span>
+                        </h3>
+                        <div class="overflow-x-auto border border-stone-200 rounded-xl">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase text-[11px] font-semibold">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Ingrédient</th>
+                                        <th class="py-2.5 px-3 text-right">Quantité</th>
+                                        <th class="py-2.5 px-3 text-right">Prix Unitaire</th>
+                                        <th class="py-2.5 px-3 text-right">Coût Ingrédient</th>
+                                    </tr>
+                                </thead>
+								<tbody class="divide-y divide-stone-100">
+                                    ${data.itemsWithDetails.map(item => {
+                                        const subRecipe = recipes.find(r => r.id === item.ingredientId);
+                                        
+                                        let subIngredientsHtml = '';
+                                        if (subRecipe) {
+                                            // Calcul du poids total de la sous-recette de base
+                                            const subRecipeBaseWeight = subRecipe.items.reduce((sum, sub) => sum + sub.quantity, 0);
+                                            // Ratio par rapport à la quantité demandée dans la brioche (item.scaledQty)
+                                            const ratio = subRecipeBaseWeight > 0 ? (item.scaledQty / subRecipeBaseWeight) : 0;
+
+                                            subIngredientsHtml = `<ul style="font-size: 0.8em; color: #666; margin-top: 3px; padding-left: 0; list-style: none;">` +
+                                                subRecipe.items.map(subItem => {
+                                                    const resolvedSub = resolveItemDetails(subItem.ingredientId, subItem.quantity);
+                                                    const calculatedWeight = subItem.quantity * ratio;
+                                                    return `<li>• ${resolvedSub.name} : ${calculatedWeight >= 1000 ? (calculatedWeight/1000).toFixed(2) + ' kg' : calculatedWeight.toFixed(0) + ' g'}</li>`;
+                                                }).join('') +
+                                            `</ul>`;
+                                        }
+
+                                        return `
+                                            <tr class="hover:bg-stone-50">
+                                                <td class="py-2.5 px-3 font-medium text-stone-900">
+                                                    ${subRecipe ? subRecipe.name : item.ingredientName}
+                                                    ${subIngredientsHtml}
+                                                </td>
+                                                <td class="py-2.5 px-3 text-right font-bold text-amber-900 align-top">
+                                                    ${item.unit === 'piece' ? item.scaledQty + ' pce(s)' : (item.scaledQty >= 1000 ? (item.scaledQty/1000).toFixed(2) + ' kg/L' : item.scaledQty.toFixed(0) + ' g/ml')}
+                                                </td>
+                                                <td class="py-2.5 px-3 text-right text-stone-500 align-top">${item.unitPrice.toFixed(2)} € / ${item.unit}</td>
+                                                <td class="py-2.5 px-3 text-right font-semibold text-stone-900 align-top">${item.cost.toFixed(2)} €</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Instructions / Procédé -->
+                    ${recipe.instructions ? `
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-stone-700 mb-2 flex items-center space-x-2">
+                                <i class="fa-solid fa-align-left text-amber-600"></i>
+                                <span>Procédé de Fabrication</span>
+                            </h3>
+                            <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-700 leading-relaxed whitespace-pre-line">
+                                ${recipe.instructions}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Macronutrients & Nutrition Section -->
+                    <div class="pt-4 border-t border-stone-200">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-stone-700 mb-4 flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-pie text-amber-600"></i>
+                            <span>Analyse Nutritionnelle</span>
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- Macro Cards Grid -->
+                            <div class="md:col-span-7 grid grid-cols-2 gap-3">
+                                <div class="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl">
+                                    <span class="text-xs text-amber-900 font-semibold block">Énergie / Portion</span>
+                                    <span class="text-lg font-black text-amber-800">${data.perPortion.calories.toFixed(0)} kcal</span>
+                                    <span class="text-[11px] text-amber-700 block">${data.per100g.calories.toFixed(0)} kcal / 100g</span>
+                                </div>
+                                <div class="p-3 bg-blue-50/60 border border-blue-200/60 rounded-xl">
+                                    <span class="text-xs text-blue-900 font-semibold block">Protéines / Portion</span>
+                                    <span class="text-lg font-black text-blue-800">${data.perPortion.protein.toFixed(1)} g</span>
+                                    <span class="text-[11px] text-blue-700 block">${data.per100g.protein.toFixed(1)} g / 100g</span>
+                                </div>
+                                <div class="p-3 bg-emerald-50/60 border border-emerald-200/60 rounded-xl">
+                                    <span class="text-xs text-emerald-900 font-semibold block">Glucides / Portion</span>
+                                    <span class="text-lg font-black text-emerald-800">${data.perPortion.carbs.toFixed(1)} g</span>
+                                    <span class="text-[11px] text-emerald-700 block">${data.per100g.carbs.toFixed(1)} g / 100g</span>
+                                </div>
+                                <div class="p-3 bg-rose-50/60 border border-rose-200/60 rounded-xl">
+                                    <span class="text-xs text-rose-900 font-semibold block">Lipides / Portion</span>
+                                    <span class="text-lg font-black text-rose-800">${data.perPortion.fat.toFixed(1)} g</span>
+                                    <span class="text-[11px] text-rose-700 block">${data.per100g.fat.toFixed(1)} g / 100g</span>
+                                </div>
+                            </div>
+
+                            <!-- Macro Pie Chart -->
+                            <div class="md:col-span-5 flex flex-col items-center justify-center p-3 bg-stone-50 border border-stone-200 rounded-xl h-52">
+                                <canvas id="nutrition-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            renderNutritionChart(data.totalProtein, data.totalCarbs, data.totalFat);
+        }
+
+        // CHART RENDERING
+        function renderNutritionChart(protein, carbs, fat) {
+            const ctx = document.getElementById('nutrition-chart');
+            if (!ctx) return;
+
+            if (nutritionChart) {
+                nutritionChart.destroy();
+            }
+
+            nutritionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Protéines (g)', 'Glucides (g)', 'Lipides (g)'],
+                    datasets: [{
+                        data: [protein, carbs, fat],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f43f5e'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 10, family: 'Plus Jakarta Sans' }, boxWidth: 12 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // RECIPE MODAL LOGIC
+        function openRecipeModal(id = null) {
+            const modal = document.getElementById('modal-recipe');
+            const form = document.getElementById('recipe-form');
+            const container = document.getElementById('recipe-ingredients-inputs');
+            container.innerHTML = '';
+
+            if (id) {
+                const recipe = recipes.find(r => r.id === id);
+                if (recipe) {
+                    document.getElementById('modal-recipe-title').innerHTML = '<i class="fa-solid fa-pen text-amber-500"></i><span> Modifier la Recette</span>';
+                    document.getElementById('recipe-id').value = recipe.id;
+                    document.getElementById('recipe-name').value = recipe.name;
+                    document.getElementById('recipe-category').value = recipe.category;
+                    document.getElementById('recipe-servings').value = recipe.servings;
+                    document.getElementById('recipe-margin').value = recipe.margin || 70;
+                    document.getElementById('recipe-vat').value = recipe.vat || 5.5;
+                    document.getElementById('recipe-baking').value = recipe.baking || '';
+                    document.getElementById('recipe-instructions').value = recipe.instructions || '';
+
+                    recipe.items.forEach(item => {
+                        addIngredientRowToForm(item.ingredientId, item.quantity);
+                    });
+                }
+            } else {
+                document.getElementById('modal-recipe-title').innerHTML = '<i class="fa-solid fa-book-open text-amber-500"></i><span> Créer une Nouvelle Recette</span>';
+                document.getElementById('recipe-id').value = '';
+                form.reset();
+                addIngredientRowToForm();
+                addIngredientRowToForm();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeRecipeModal() {
+            document.getElementById('modal-recipe').classList.add('hidden');
+        }
+
+        function addIngredientRowToForm(selectedIngId = '', quantity = '') {
+            const container = document.getElementById('recipe-ingredients-inputs');
+            const rowId = `ing-row-${Date.now()}-${Math.random()}`;
+
+            const div = document.createElement('div');
+            div.id = rowId;
+            div.className = 'flex items-center space-x-2 bg-stone-50 p-2 rounded-xl border border-stone-200';
+
+            const ingOptions = ingredients.map(i => `<option value="${i.id}" ${i.id === selectedIngId ? 'selected' : ''}>${i.name} (${i.price.toFixed(2)}€/${i.unit})</option>`).join('');
+            
+            const currentRecipeId = document.getElementById('recipe-id').value;
+            const recOptions = recipes
+                .filter(r => r.id !== currentRecipeId)
+                .map(r => `<option value="${r.id}" ${r.id === selectedIngId ? 'selected' : ''}>🍳 Recette : ${r.name}</option>`)
+                .join('');
+
+            div.innerHTML = `
+                <select class="recipe-ing-select flex-1 p-2 bg-white border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    <option value="">-- Choisir Ingrédient ou Recette --</option>
+                    <optgroup label="Ingrédients de la Mercuriale">
+                        ${ingOptions}
+                    </optgroup>
+                    <optgroup label="Recettes Composées (Sous-recettes)">
+                        ${recOptions}
+                    </optgroup>
+                </select>
+                <div class="relative w-32">
+                    <input type="number" step="1" min="1" value="${quantity}" placeholder="Qté" class="recipe-ing-qty w-full p-2 pr-10 bg-white border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    <span class="absolute right-2 top-2 text-xs font-bold text-stone-400">g/ml/pce</span>
+                </div>
+                <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-stone-400 hover:text-red-500 p-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function saveRecipe(e) {
+            e.preventDefault();
+            const id = document.getElementById('recipe-id').value;
+            
+            const rows = document.querySelectorAll('#recipe-ingredients-inputs > div');
+            const items = [];
+            rows.forEach(row => {
+                const ingId = row.querySelector('.recipe-ing-select').value;
+                const qty = parseFloat(row.querySelector('.recipe-ing-qty').value);
+                if (ingId && !isNaN(qty) && qty > 0) {
+                    items.push({ ingredientId: ingId, quantity: qty });
+                }
+            });
+
+            if (items.length === 0) {
+                alert('Veuillez ajouter au moins un ingrédient valide avec une quantité.');
+                return;
+            }
+
+            const newRecipe = {
+                id: id || 'r_' + Date.now(),
+                name: document.getElementById('recipe-name').value.trim(),
+                category: document.getElementById('recipe-category').value,
+                servings: parseInt(document.getElementById('recipe-servings').value) || 1,
+                margin: parseFloat(document.getElementById('recipe-margin').value) || 70,
+                vat: parseFloat(document.getElementById('recipe-vat').value) || 5.5,
+                baking: document.getElementById('recipe-baking').value.trim(),
+                instructions: document.getElementById('recipe-instructions').value.trim(),
+                items: items
+            };
+
+            if (id) {
+                const index = recipes.findIndex(r => r.id === id);
+                if (index !== -1) recipes[index] = newRecipe;
+            } else {
+                recipes.push(newRecipe);
+                activeRecipeId = newRecipe.id;
+            }
+
+            saveToLocalStorage();
+            renderRecipesList();
+            renderActiveRecipe();
+            closeRecipeModal();
+        }
+
+        function deleteRecipe(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer cette recette ?")) {
+                recipes = recipes.filter(r => r.id !== id);
+                if (recipes.length > 0) activeRecipeId = recipes[0].id;
+                else activeRecipeId = null;
+
+                saveToLocalStorage();
+                renderRecipesList();
+                renderActiveRecipe();
+            }
+        }
+
+		// Exemple de fonction de rendu de la liste des ingrédients
+		function renderIngredients(items, allRecipes) {
+		  let html = '<ul>';
+		  
+		  items.forEach(item => {
+			// Si l'élément est une sous-recette (ex: 'r18' pour le Gianduja)
+			if (item.ingredientId && item.ingredientId.startsWith('r')) {
+			  // Recherche de la recette correspondante dans vos données
+			  let subRecipe = allRecipes.find(r => r.id === item.ingredientId);
+			  
+			  if (subRecipe) {
+				html += `<li>
+				  <strong>${subRecipe.name}</strong> : ${item.quantity} g
+				  <ul style="font-size: 0.85em; color: #666; margin-top: 2px; padding-left: 20px;">`;
+				  
+				  // Boucle sur les sous-ingrédients de la recette (ex: Noisettes, Sucre glace, Chocolat au lait)
+				  subRecipe.items.forEach(subItem => {
+					html += `<li>${subItem.name} : ${subItem.quantity} g</li>`;
+				  });
+				  
+				html += `</ul></li>`;
+			  }
+			} else {
+			  // Ingrédient classique
+			  html += `<li><strong>${item.name}</strong> : ${item.quantity} g</li>`;
+			}
+		  });
+		  
+		  html += '</ul>';
+		  return html;
+		}
+
+
+
+        // ================= QUICK SIMULATOR LOGIC =================
+        function calculateQuickSimulator() {
+            const cost = parseFloat(document.getElementById('quick-cost').value) || 0;
+            const margin = parseFloat(document.getElementById('quick-margin').value) || 0;
+            const vat = parseFloat(document.getElementById('quick-vat').value) || 5.5;
+            const pieces = parseInt(document.getElementById('quick-pieces').value) || 1;
+
+            const marginFraction = margin / 100;
+            const totalHT = marginFraction < 1 ? cost / (1 - marginFraction) : cost;
+            const vatFraction = vat / 100;
+            const totalTTC = totalHT * (1 + vatFraction);
+
+            const pieceTTC = pieces > 0 ? totalTTC / pieces : 0;
+            const netProfit = totalHT - cost;
+            const coef = cost > 0 ? (totalTTC / cost) : 0;
+
+            document.getElementById('quick-res-total-ttc').textContent = `${totalTTC.toFixed(2)} €`;
+            document.getElementById('quick-res-total-ht').textContent = `(${totalHT.toFixed(2)} € HT)`;
+            document.getElementById('quick-res-piece-ttc').textContent = `${pieceTTC.toFixed(2)} €`;
+            document.getElementById('quick-res-profit').textContent = `${netProfit.toFixed(2)} €`;
+            document.getElementById('quick-res-coef').textContent = `× ${coef.toFixed(2)}`;
+        }
+
+        // PRINT HELPER
+        function printRecipe() {
+            window.print();
+        }
+    </script>
+	<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => { console.log('Service Worker enregistré !', reg); })
+      .catch((err) => { console.log('Erreur d\'enregistrement du SW :', err); });
+  });
+}
+</script>
+</body>
+</html>
