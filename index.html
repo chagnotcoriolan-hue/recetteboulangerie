@@ -684,8 +684,8 @@
                 baking: '45 à 53 mn @ 190°C',
                 instructions: 'Incorporer le praliné de pistache une fois l\'appareil réalisé .',
                 items: [
-                    { ingredientId: '35', quantity: 75 },
-                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: 'r21', quantity: 100 },
+                    { ingredientId: '3', quantity: 60 },
                     { ingredientId: '10', quantity: 70 },
                     { ingredientId: '11', quantity: 165 },
                     { ingredientId: '8', quantity: 885 },
@@ -702,8 +702,8 @@
                 baking: '45 à 53 mn @ 190°C',
                 instructions: 'Incorporer la pâte de sésame noir une fois l\'appareil réalisé.',
                 items: [
-                    { ingredientId: '37', quantity: 75 },
-                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: 'r22', quantity: 100 },
+                    { ingredientId: '3', quantity: 60 },
                     { ingredientId: '10', quantity: 70 },
                     { ingredientId: '11', quantity: 165 },
                     { ingredientId: '8', quantity: 885 },
@@ -721,7 +721,7 @@
                 instructions: 'Incorporer le praliné une fois l\'appareil réalisé.',
                 items: [
                     { ingredientId: 'r20', quantity: 100 },
-                    { ingredientId: '3', quantity: 110 },
+                    { ingredientId: '3', quantity: 60 },
                     { ingredientId: '10', quantity: 70 },
                     { ingredientId: '11', quantity: 165 },
                     { ingredientId: '8', quantity: 885 },
@@ -810,7 +810,35 @@
                     { ingredientId: '3', quantity: 100 },
                     { ingredientId: '36', quantity: 100 },
                 ]
-            }
+            },
+						            {
+                id: 'r21',
+                name: 'Praliné pistache',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Torréfaction 20 mn @ 180°C',
+                instructions: 'Torréfier, couler caramel, broyer',
+                items: [
+                    { ingredientId: '3', quantity: 100 },
+                    { ingredientId: '35', quantity: 100 },
+                ]
+			},
+									            {
+                id: 'r22',
+                name: 'Praliné sésame noir',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Torréfaction 20 mn @ 180°C',
+                instructions: 'Torréfier, couler caramel, broyer',
+                items: [
+                    { ingredientId: '3', quantity: 100 },
+                    { ingredientId: '37', quantity: 100 },
+                ]
+			}
         ];
 
         let activeRecipeId = 'r1';
