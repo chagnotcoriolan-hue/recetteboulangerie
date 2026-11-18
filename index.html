@@ -757,7 +757,7 @@
 				{ ingredientId: '22', quantity: 133 },
 				{ ingredientId: '3', quantity: 112 },
 				{ ingredientId: '17', quantity: 13.3 },
-				{ ingredientId: '41', quantity: 139 },
+				{ ingredientId: '4', quantity: 139 },
 				{ ingredientId: '1', quantity: 133 },
 				{ ingredientId: '5', quantity: 4 },
 				{ ingredientId: 'r18', quantity: 80 }
@@ -838,7 +838,61 @@
                     { ingredientId: '3', quantity: 100 },
                     { ingredientId: '37', quantity: 100 },
                 ]
-			}
+			},
+												            {
+                id: 'r23',
+                name: 'Levain panetonne',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '3 rafraichi 28°C',
+                instructions: 'Rafraichi entre 0.4 et 0.45 H2O',
+                items: [
+                    { ingredientId: '40', quantity: 100 },
+                    { ingredientId: '19', quantity: 45 },
+                ]
+			},				
+			            {
+                id: 'r24',
+                name: 'Panetonne pate 1',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Fermenter 26°C 14h mini, tripler volume',
+                instructions: 'Pétrir farine, levain, eau et 40% jaune oeuf (15mn), ajouter le restant des jaunes lentement (20mn). Ajouter le sucre en deux fois (10mn). Incorporer le beurre mou (3-5mn).',
+                items: [
+                    { ingredientId: '40', quantity: 180 },
+                    { ingredientId: '19', quantity: 90 },
+                    { ingredientId: 'r23', quantity: 45 },
+                    { ingredientId: '3', quantity: 57 },
+                    { ingredientId: '41', quantity: 45 },
+                    { ingredientId: '1', quantity: 45 },
+                ]
+            },
+					            {
+                id: 'r25',
+                name: 'Panetonne 3 chocolats pate 2',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Repos pate 60 mn bac pH 5.5 - Paton 1125g - Bouler et repos 30 mn. Pousse 28-30°C pendant 4-8h. Cuisson 55 mn @ 170°C',
+                instructions: 'Pétrir farine et pate 1 (20mn), ajouter le sucre, miel et 1/3 des jaunes (25mn). Ajouter le restant des jaunes, pate orange et sel. Ajouter le beurre très mou en une seule fois (2-3mn). Incorporer le beurre mou (3-5mn). Ajouter le chocolat lorsque la pate est bien structuree (3mn)',
+                items: [
+                    { ingredientId: 'r24', quantity: 463 },				
+                    { ingredientId: '40', quantity: 45 },
+                    { ingredientId: '3', quantity: 34 },
+                    { ingredientId: '38', quantity: 22 },
+                    { ingredientId: '41', quantity: 82 },
+                    { ingredientId: '1', quantity: 124 },
+                    { ingredientId: '5', quantity: 2.7 },
+					{ ingredientId: '25', quantity: 75  },
+                    { ingredientId: '26', quantity: 75 },
+                    { ingredientId: '27', quantity: 75 },
+                ]
+            }	
         ];
 
         let activeRecipeId = 'r1';
