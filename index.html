@@ -454,8 +454,12 @@
             { id: '39', name: 'Farine de seigle', price: 2.90, unit: 'kg', calories: 338, protein: 9.0, carbs: 74.0, fat: 1.7 },
             { id: '40', name: 'Farine Manitoba', price: 7.22, unit: 'kg', calories: 355, protein: 14.0, carbs: 70.0, fat: 1.2 },
             { id: '41', name: 'Jaune d\'oeuf', price: 11.22, unit: 'kg', calories: 322, protein: 16.0, carbs: 0.6, fat: 27.0 },
-			{ id: '42', name: 'Epice pain', price: 10, unit: 'kg', calories: 0, protein: 0, carbs: 0, fat: 0 }
-        ];
+			{ id: '42', name: 'Epice pain', price: 10, unit: 'kg', calories: 0, protein: 0, carbs: 0, fat: 0 },
+			{ id: '43', name: 'Poudre de noisette', price: 37, unit: 'kg', calories: 628, protein: 15.0, carbs: 17.0, fat: 61.0 },
+			{ id: '44', name: 'Blanc d\'oeuf', price: 4.88, unit: 'kg', calories: 47, protein: 10.0, carbs: 1.0, fat: 0.17 },
+		];
+
+
 
         let recipes = [
             {
@@ -916,7 +920,49 @@
                     { ingredientId: '38', quantity: 348 },
                     { ingredientId: '42', quantity: 7 },
                 ]
-            }
+            },
+			{
+			    id: 'r27',
+                name: 'Crème mousseline',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Avec gousse de vanille',
+                instructions: '1. Porter à ébullition le lait et vanille puis laisser infuser 1 heures hors du feu. 2. Blanchir jaunes et sucre puis ajouter fécule et farine tamisée. 3.Verser le lait sur la préparation tout en fouettant. 4. Transvaser dans une casserolle et faire chauffer sur feu moyen. La crème doit épaissir. 5. Hors du feu, ajouter le beurre coupé en petits morceaux puis mélanger et filmer au contact. 6. Laisser refroidir puis ajouter petit à petit le reste du beurre en fouettant, incorporer ensuite le praliné. 7. Tranvaser la préparation dans une poche à douille et réserver 1h au frigo.',
+                items: [
+                    { ingredientId: '8', quantity: 250 },				
+                    { ingredientId: '9', quantity: 0.5 },
+                    { ingredientId: '7', quantity: 10 },
+					{ ingredientId: '10', quantity: 20 },				
+                    { ingredientId: '3', quantity: 50 },
+                    { ingredientId: '41', quantity: 40 },
+					{ ingredientId: '1', quantity: 130 },
+                    { ingredientId: 'r20', quantity: 75 },
+                ]
+            },			
+			{
+			    id: 'r28',
+                name: 'Dacquoise noisette',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '20 mn @170°C',
+                instructions: '1. Torréfier les poudres au four pendant 10 mn à 150°C. 2. Laisser le four allumer à 170°C. 3.Tamiser les poudres refroidies, la farine et le sucre glace. 4. Monter les blancs en neige avec le sucre en poudre puis incorporer les délicatement au mélange tamisé. 5. Transvaser la préparation dans une poche douille munie d\'une douille lisse. 6. Sur une plaque de cuisson, déposer une feuille de papier sulfurisé et pocher deux disques de 20 et 22 cm de diametre. 7. Pocher en escargot la dacquoise en l\'intérieur des disques puis enfourner 20 mn.',
+                items: [
+                    { ingredientId: '6', quantity: 75 },				
+                    { ingredientId: '43', quantity: 75 },
+                    { ingredientId: '3', quantity: 40 },
+					{ ingredientId: '7', quantity: 35 },				
+                    { ingredientId: '44', quantity: 150},
+                    { ingredientId: '31', quantity: 100 },
+                ]
+            },				
+			
+			
+			
+			
         ];
 
         let activeRecipeId = null;
