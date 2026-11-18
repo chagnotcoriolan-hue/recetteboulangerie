@@ -456,7 +456,8 @@
             { id: '41', name: 'Jaune d\'oeuf', price: 11.22, unit: 'kg', calories: 322, protein: 16.0, carbs: 0.6, fat: 27.0 },
 			{ id: '42', name: 'Epice pain', price: 10, unit: 'kg', calories: 0, protein: 0, carbs: 0, fat: 0 },
 			{ id: '43', name: 'Poudre de noisette', price: 37, unit: 'kg', calories: 628, protein: 15.0, carbs: 17.0, fat: 61.0 },
-			{ id: '44', name: 'Blanc d\'oeuf', price: 4.88, unit: 'kg', calories: 47, protein: 10.0, carbs: 1.0, fat: 0.17 },
+			{ id: '44', name: 'Blanc d\'oeuf', price: 5.00, unit: 'kg', calories: 47, protein: 10.0, carbs: 1.0, fat: 0.17 },
+			{ id: '45', name: 'Farine petit épeautre', price: 6.45, unit: 'kg', calories: 350, protein: 10.0, carbs: 72.0, fat: 0.17 },
 		];
 
 
@@ -584,12 +585,12 @@
                 margin: 80,
                 vat: 5.5,
                 baking: '20 mn @ 250°C puis 25 mn @ 200°C',
-                instructions: 'Mélanger eau, farine T80, levain et fleur de sel. Pétrissage doux, longues fermentations avec rabats.',
+                instructions: 'Mélanger eau, farine T80, levain et fleur de sel. Pétrissage doux, pointage 3h, appret 1h15.',
                 items: [
-                    { ingredientId: '19', quantity: 1000 },
-                    { ingredientId: '20', quantity: 1500 },
-                    { ingredientId: '21', quantity: 27 },
-                    { ingredientId: '22', quantity: 300 }
+                    { ingredientId: '19', quantity: 1270 },
+                    { ingredientId: '20', quantity: 1905 },
+                    { ingredientId: '21', quantity: 34 },
+                    { ingredientId: '22', quantity: 381 }
                 ]
             },
             {
@@ -959,7 +960,22 @@
                     { ingredientId: '31', quantity: 100 },
                 ]
             },				
-			
+			{
+			    id: 'r29',
+                name: 'Pain de petit épautre',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: '30 mn @235°C, 45 mn @200°C',
+                instructions: 'Pointage 3h - appret 1h30',
+                items: [
+                    { ingredientId: '45', quantity: 297 },				
+                    { ingredientId: '19', quantity: 238 },
+                    { ingredientId: '5', quantity: 5.35 },
+					{ ingredientId: '22', quantity: 60 },				
+                ]
+            },				
 			
 			
 			
