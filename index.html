@@ -446,7 +446,8 @@
             { id: '38', name: 'Miel Premium', price: 25.00, unit: 'kg', calories: 304, protein: 0.3, carbs: 82.0, fat: 0.0 },
             { id: '39', name: 'Farine de seigle', price: 2.90, unit: 'kg', calories: 338, protein: 9.0, carbs: 74.0, fat: 1.7 },
             { id: '40', name: 'Farine Manitoba', price: 7.22, unit: 'kg', calories: 355, protein: 14.0, carbs: 70.0, fat: 1.2 },
-            { id: '41', name: 'Jaune d\'oeuf', price: 11.22, unit: 'kg', calories: 322, protein: 16.0, carbs: 0.6, fat: 27.0 }
+            { id: '41', name: 'Jaune d\'oeuf', price: 11.22, unit: 'kg', calories: 322, protein: 16.0, carbs: 0.6, fat: 27.0 },
+			{ id: '42', name: 'Epice pain', price: 10, unit: 'kg', calories: 0, protein: 0, carbs: 0, fat: 0 }
         ];
 
         // All 19 Complete User Recipes
@@ -736,10 +737,12 @@
                 margin: 75,
                 vat: 5.5,
                 baking: '3 heures @ 130°C',
-                instructions: 'Mélanger avec la farine de seigle et les épices. Cuisson très douce et longue.',
+                instructions: 'Détendre pate mere avec 2/3 eau. Ajouter le restant eau, poudre a lever et farine.',
                 items: [
-                    { ingredientId: '17', quantity: 250 },
-                    { ingredientId: '39', quantity: 250 }
+                    { ingredientId: 'r26', quantity: 586 },
+                    { ingredientId: '39', quantity: 5.8 },
+                    { ingredientId: '18', quantity: 4 },
+                    { ingredientId: '19', quantity: 54 }					
                 ]
             },
 			{
@@ -892,7 +895,21 @@
                     { ingredientId: '26', quantity: 75 },
                     { ingredientId: '27', quantity: 75 },
                 ]
-            }	
+            },
+			    id: 'r26',
+                name: 'Pate mere pain epice',
+                category: 'Pâtisserie',
+                servings: 1,
+                margin: 75,
+                vat: 5.5,
+                baking: 'Fermentation plusieurs mois',
+                instructions: 'Mélanger epice, miel et farine',
+                items: [
+                    { ingredientId: '39', quantity: 232 },				
+                    { ingredientId: '38', quantity: 348 },
+                    { ingredientId: '42', quantity: 7 },
+                ]
+            }
         ];
 
         let activeRecipeId = 'r1';
